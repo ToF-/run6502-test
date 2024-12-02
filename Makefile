@@ -11,3 +11,6 @@ example:
 echo:
 	xa echo.s -o echo.bin
 	run6502 -l 1000 echo.bin -R 1000 -G FFCC -P FFEE -X 0
+
+echolib:
+	cc -o echo echo.c -l6502
