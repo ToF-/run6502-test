@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "lib6502.h"
+#include "binary.h"
 
 /* Emulated OS functions. */
 
@@ -50,33 +51,17 @@ int rdch(M6502 *mpu, uint16_t address, uint8_t data)
  */
 int done(M6502 *mpu, uint16_t address, uint8_t data)
 {
-  char buffer[64];
-
-  /* Dump the internal state of the processor.
-   */
-  M6502_dump(mpu, buffer);
-
-  /* Print a cute message and quit.
-   */
-  printf("\nBRK instruction\n%s\n", buffer);
   exit(0);
 }
 
-#define ASSEMBLY_SIZE 55
-uint8_t assembly[ASSEMBLY_SIZE] = {
-  0xa0, 0x00, 0x20, 0xcc, 0xff, 0xc9, 0x0a, 0xf0, 0x06, 0x99, 0x37, 0x10, 0xc8, 0x10, 0xf3, 0xc0
-, 0x00, 0xf0, 0x23, 0x8c, 0x36, 0x11, 0xa0, 0x00, 0xcc, 0x36, 0x11, 0xf0, 0x0a, 0xb9, 0x37, 0x10
-, 0x20, 0xee, 0xff, 0xc8, 0x4c, 0x18, 0x10, 0xa9, 0x0d, 0x20, 0xee, 0xff, 0xa9, 0x0a, 0x20, 0xee
-, 0xff, 0xac, 0x36, 0x11, 0xd0, 0xca, 0x60 };
-        
 int main()
 {
   M6502    *mpu = M6502_new(0, 0, 0);   /* Make a 6502 */
   unsigned  pc  = 0x1000;       /* PC for 'assembly' */
 
   /* install the assembly code into ram */
-  for(int i=0; i<ASSEMBLY_SIZE; i++) {
-      mpu->memory[pc++] = (uint8_t)assembly[i];
+  for(int i=0; i<BINARY_SIZE; i++) {
+      mpu->memory[pc++] = (uint8_t)binary[i];
   }
 
   /* Install the three callback functions defined above.
