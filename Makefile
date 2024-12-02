@@ -14,3 +14,8 @@ echo:
 
 echolib:
 	cc -o bin/echo echo.c -l6502
+
+screen:
+	xa screen.s -o screen.bin
+	bin2c screen.bin -o screen_bin.h
+	cc -o bin/screen screen.c -l6502
