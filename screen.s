@@ -1,18 +1,19 @@
+    lda #$20
     ldy #$00
-loop:
-    tya 
-    clc
-    adc #$20
-    cmp #$7F
-    bcs increment
-    sta $0200,y
-    sta $0300,y
-    sta $0400,y
-    sta $0500,y
+loop_row:
+    ldx #$00
+loop_col:
     jsr $FFBB
-increment:
+    jsr $FFB0
     inc
+    cmp #$7F
+    bne next
+    lda #$20
+next:
+    inx
+    cpx #$40
+    bne loop_col
     iny
-    cpy #$80
-    bne loop
+    cpy #$20
+    bne loop_row
     rts

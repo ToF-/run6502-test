@@ -6,7 +6,8 @@
 
 /* Emulated OS functions. */
 
-#define SCRN    0xFFBB  /* print the mapped screen $200-$600 */
+#define SCRN    0xFFBB  /* print a in screen at x y */
+#define COLR    0xFFB0  /* put color a in screen at x y */
 #define RDCH    0xFFCC  /* read stdin char in accumulator */
 #define WRCH    0xFFEE  /* Write accumulator to stdout. */
 #define RAND    0x00FE  /* random byte value */
@@ -55,25 +56,38 @@ int done(M6502 *mpu, uint16_t address, uint8_t data)
   exit(0);
 }
 
-uint8_t screen[0x400];
+uint8_t screen[0x1000];
 
-/* print the area $0200-05FF as screen */
 int scrn(M6502 *mpu, uint16_t address, uint8_t data)
 {
+
+    int col = mpu->registers->y % 0x40;
+    int row = mpu->registers->x % 0x40;
+    int value = mpu->registers->a;
+    screen[row * col] = value;
+    printf("\033[%d;%dH%c",col+1,row+1,value);
     int pc;
-    for(int index = 0x0200; index < 0x0600; index++) {
-        int offset = index - 0x0200;
-        int value = mpu->memory[index];
-        if (value != screen[offset]) {
-            screen[offset] = value;
-            int x = offset / 32 + 1;
-            int y = offset % 32 + 1;
-            printf("\033[%d;%dH%c",x,y,value);
-        }
-    }
     pc  = mpu->memory[++mpu->registers->s + 0x100];
     pc |= mpu->memory[++mpu->registers->s + 0x100] << 8;
     return pc + 1;
+}
+
+uint8_t colors[0x1000];
+int colr(M6502 *mpu, uint16_t address, uint8_t data)
+{
+    int col = mpu->registers->y % 0x40;
+    int row = mpu->registers->x % 0x40;
+    int color = mpu->registers->a & 0x0F;
+    int value = screen[row * col];
+    colors[row * col] = color;
+    int num = color < 8 ? color + 30 : color + 82;
+    printf("\033[%dm█", num);
+    printf("\033[%d;%dH%c",col+1,row+1, value);
+    int pc;
+    pc  = mpu->memory[++mpu->registers->s + 0x100];
+    pc |= mpu->memory[++mpu->registers->s + 0x100] << 8;
+    return pc + 1;
+
 }
 int main()
 {
@@ -90,6 +104,7 @@ int main()
   M6502_setCallback(mpu, call, WRCH, wrch); /* Calling FFEE -> wrch() */
   M6502_setCallback(mpu, call, RDCH, rdch); /* Calling FFCC -> rdch() */
   M6502_setCallback(mpu, call, SCRN, scrn); /* Calling FFBB -> scrn() */
+  M6502_setCallback(mpu, call, COLR, colr); /* Calling FFB0 -> scrn() */
   M6502_setCallback(mpu, call,    0, done); /* Calling 0 -> done() */
 
   /* Point the RESET vector at the first instruction in the assembled
