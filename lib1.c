@@ -77,7 +77,7 @@ int main()
 
   /* A few macros that dump bytes into the 6502's memory.
    */
-# define gen0(X)	(mpu->memory[pc++]= (uint8_t)(X))
+# define gen1(X)	(mpu->memory[pc++]= (uint8_t)(X))
 # define gen2(X,Y)	gen1(X); gen1(Y)
 # define gen3(X,Y,Z)	gen1(X); gen2(Y,Z)
 
