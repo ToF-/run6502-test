@@ -1,5 +1,5 @@
 lib1: lib1.c
-	cc -o lib1 lib1.c -l6502
+	cc -o bin/lib1 lib1.c -l6502
 
 clean:
 	rm -f lib1
@@ -19,3 +19,8 @@ screen:
 	xa screen.s -o screen.bin
 	bin2c screen.bin -o screen_bin.h
 	cc -o bin/screen screen.c -l6502
+
+reads:
+	xa reads.s -o reads.bin
+	bin2c reads.bin -o reads_bin.h
+	cc -o bin/reads reads.c -l6502
